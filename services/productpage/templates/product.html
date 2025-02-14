@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Book.Title}} - BookInfo</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <h1><a href="/">BookInfo</a></h1>
+                <div class="user-info">
+                    <select id="user-selector" onchange="updateUser()">
+                        <option value="">选择用户</option>
+                        <option value="normal">普通用户</option>
+                        <option value="jason">Jason</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="book-details">
+                <div class="book-cover">
+                    <img src="{{.Book.CoverImage}}" alt="{{.Book.Title}}">
+                </div>
+                <div class="book-info">
+                    <h2>{{.Book.Title}}</h2>
+                    <p class="author">作者：{{.Book.Author}}</p>
+                    <p class="publisher">出版社：{{.Book.Publisher}}</p>
+                    <p class="isbn">ISBN：{{.Book.ISBN}}</p>
+                    <p class="price">价格：¥{{.Book.Price}}</p>
+                    <div class="rating" id="rating">
+                        <!-- 评分将通过 JavaScript 动态加载 -->
+                    </div>
+                    <p class="description">{{.Book.Description}}</p>
+                </div>
+            </div>
+
+            <div class="reviews-section">
+                <h3>读者评论</h3>
+                <div class="reviews" id="reviews">
+                    <!-- 评论将通过 JavaScript 动态加载 -->
+                </div>
+                <div class="add-review">
+                    <h4>添加评论</h4>
+                    <form id="review-form" onsubmit="submitReview(event)">
+                        <textarea name="content" required placeholder="写下你的评论..."></textarea>
+                        <div class="rating-input">
+                            <span>评分：</span>
+                            <select name="rating" required>
+                                <option value="5">5 星</option>
+                                <option value="4">4 星</option>
+                                <option value="3">3 星</option>
+                                <option value="2">2 星</option>
+                                <option value="1">1 星</option>
+                            </select>
+                        </div>
+                        <button type="submit">提交评论</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BookInfo 微服务示例项目</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/product.js"></script>
+</body>
+</html> 

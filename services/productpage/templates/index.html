@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookInfo - 图书微服务示例</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <h1><a href="/">BookInfo</a></h1>
+                <div class="search-box">
+                    <input type="text" id="search" placeholder="搜索图书...">
+                    <button onclick="searchBooks()">搜索</button>
+                </div>
+                <div class="user-info">
+                    <select id="user-selector" onchange="updateUser()">
+                        <option value="">选择用户</option>
+                        <option value="normal">普通用户</option>
+                        <option value="jason">Jason</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="book-list" id="book-list">
+            <!-- 图书列表将通过 JavaScript 动态加载 -->
+        </div>
+
+        <div class="pagination">
+            <button onclick="prevPage()">上一页</button>
+            <span id="current-page">第 1 页</span>
+            <button onclick="nextPage()">下一页</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BookInfo 微服务示例项目</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 

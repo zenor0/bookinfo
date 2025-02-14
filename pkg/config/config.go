@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -26,8 +28,8 @@ type DatabaseConfig struct {
 }
 
 type TracingConfig struct {
-	Enabled    bool   `mapstructure:"enabled"`
-	JaegerURL  string `mapstructure:"jaeger_url"`
+	Enabled     bool   `mapstructure:"enabled"`
+	JaegerURL   string `mapstructure:"jaeger_url"`
 	ServiceName string `mapstructure:"service_name"`
 }
 
@@ -36,6 +38,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	defer logger.Sync()
 
 	viper.SetConfigFile(configPath)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -50,4 +53,4 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	return &config, nil
-} 
+}

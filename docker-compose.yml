@@ -1,0 +1,152 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bookinfo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookinfo-network
+
+  details:
+    build:
+      context: .
+      dockerfile: services/details/Dockerfile
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=bookinfo
+      - DATABASE_PORT=5432
+      - DATABASE_SSLMODE=disable
+      - SERVICE_VERSION=v1
+    ports:
+      - "9081:9081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookinfo-network
+
+  ratings:
+    build:
+      context: .
+      dockerfile: services/ratings/Dockerfile
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=bookinfo
+      - DATABASE_PORT=5432
+      - DATABASE_SSLMODE=disable
+      - SERVICE_VERSION=v1
+    ports:
+      - "9080:9080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookinfo-network
+
+  reviews-v1:
+    build:
+      context: .
+      dockerfile: services/reviews/Dockerfile
+      args:
+        - SERVICE_VERSION=v1
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=bookinfo
+      - DATABASE_PORT=5432
+      - DATABASE_SSLMODE=disable
+      - SERVICE_VERSION=v1
+    ports:
+      - "9082:9082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookinfo-network
+
+  reviews-v2:
+    build:
+      context: .
+      dockerfile: services/reviews/Dockerfile
+      args:
+        - SERVICE_VERSION=v2
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=bookinfo
+      - DATABASE_PORT=5432
+      - DATABASE_SSLMODE=disable
+      - SERVICE_VERSION=v2
+    ports:
+      - "9084:9082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookinfo-network
+
+  reviews-v3:
+    build:
+      context: .
+      dockerfile: services/reviews/Dockerfile
+      args:
+        - SERVICE_VERSION=v3
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=bookinfo
+      - DATABASE_PORT=5432
+      - DATABASE_SSLMODE=disable
+      - SERVICE_VERSION=v3
+    ports:
+      - "9085:9082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookinfo-network
+
+  productpage:
+    build:
+      context: .
+      dockerfile: services/productpage/Dockerfile
+    environment:
+      - SERVICE_VERSION=v1
+      - DETAILS_SERVICE_URL=details:9081
+      - REVIEWS_SERVICE_URL=reviews:9082
+      - RATINGS_SERVICE_URL=http://ratings:9080
+    ports:
+      - "9083:9083"
+    depends_on:
+      - details
+      - ratings
+      - reviews-v1
+      - reviews-v2
+      - reviews-v3
+    networks:
+      - bookinfo-network
+
+volumes:
+  postgres_data:
+
+networks:
+  bookinfo-network:
+    driver: bridge

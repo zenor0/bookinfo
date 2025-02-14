@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package details;
+
+option go_package = "github.com/zenor0/bookinfo/proto/details";
+
+service BookService {
+  rpc CreateBook(CreateBookRequest) returns (Book);
+  rpc GetBook(GetBookRequest) returns (Book);
+  rpc GetBookByISBN(GetBookByISBNRequest) returns (Book);
+  rpc ListBooks(ListBooksRequest) returns (ListBooksResponse);
+  rpc UpdateBook(UpdateBookRequest) returns (Book);
+  rpc DeleteBook(DeleteBookRequest) returns (Empty);
+  rpc SearchBooks(SearchBooksRequest) returns (SearchBooksResponse);
+}
+
+message Empty {}
+
+message Book {
+  uint32 id = 1;
+  string title = 2;
+  string author = 3;
+  string isbn = 4;
+  string publisher = 5;
+  string language = 6;
+  int32 pages = 7;
+  string year = 8;
+  float price = 9;
+  string description = 10;
+  string cover_image = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+message CreateBookRequest {
+  Book book = 1;
+}
+
+message GetBookRequest {
+  uint32 id = 1;
+}
+
+message GetBookByISBNRequest {
+  string isbn = 1;
+}
+
+message ListBooksRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListBooksResponse {
+  repeated Book data = 1;
+  message Meta {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 total = 3;
+  }
+  Meta meta = 2;
+}
+
+message UpdateBookRequest {
+  Book book = 1;
+}
+
+message DeleteBookRequest {
+  uint32 id = 1;
+}
+
+message SearchBooksRequest {
+  string query = 1;
+}
+
+message SearchBooksResponse {
+  repeated Book books = 1;
+} 
