@@ -1,0 +1,58 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: bookinfo
+build:
+  artifacts:
+    - image: bookinfo/productpage
+      context: .
+      docker:
+        dockerfile: services/productpage/Dockerfile
+    - image: bookinfo/details
+      context: .
+      docker:
+        dockerfile: services/details/Dockerfile
+    - image: bookinfo/reviews
+      context: .
+      docker:
+        dockerfile: services/reviews/Dockerfile
+    - image: bookinfo/ratings
+      context: .
+      docker:
+        dockerfile: services/ratings/Dockerfile
+  tagPolicy:
+    sha256: {}
+  local:
+    useBuildkit: true
+    push: false
+    useDockerCLI: true
+
+manifests:
+  rawYaml:
+    - deployments/kubernetes/*.yaml
+    - deployments/istio/*.yaml
+
+deploy:
+  kubectl: {}
+
+profiles:
+  - name: dev
+    build:
+      tagPolicy:
+        sha256: {}
+      local:
+        push: false
+    deploy:
+      kubectl:
+        flags:
+          apply:
+            - --validate=false
+
+  - name: prod
+    build:
+      tagPolicy:
+        sha256: {}
+      local:
+        push: true
+    deploy:
+      kubectl: {} 

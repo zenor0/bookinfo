@@ -1,5 +1,5 @@
 # 构建阶段
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -11,13 +11,17 @@ COPY go.mod ./
 COPY go.sum ./
 
 # 下载依赖
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
 # 复制源代码
 COPY . .
 
 # 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -o reviews-service ./services/reviews/cmd/main.go
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux go build -o reviews-service ./services/reviews/cmd/main.go
 
 # 运行阶段
 FROM alpine:3.19
@@ -28,7 +32,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
 # 复制配置文件
-COPY services/reviews/config/config.yaml /app/config/config.yaml
+COPY services/reviews/config /app/config
 
 # 从构建阶段复制二进制文件
 COPY --from=builder /app/reviews-service .

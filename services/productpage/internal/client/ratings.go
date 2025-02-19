@@ -1,10 +1,12 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/zenor0/bookinfo/pkg/tracing"
 	"github.com/zenor0/bookinfo/services/productpage/internal/model"
 )
 
@@ -24,9 +26,17 @@ func NewRatingsClient(baseURL string) *RatingsClient {
 	}
 }
 
-func (c *RatingsClient) GetBookRating(bookID uint) (*model.Rating, error) {
+func (c *RatingsClient) GetBookRating(ctx context.Context, bookID uint) (*model.Rating, error) {
+	ctx, span := tracing.StartSpan(ctx, "ratings.GetBookRating")
+	defer span.End()
+
 	url := fmt.Sprintf("%s/api/v1/products/%d/average-rating", c.baseURL, bookID)
-	resp, err := c.httpClient.Get(url)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get rating: %w", err)
 	}

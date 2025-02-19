@@ -4,12 +4,13 @@ metadata:
   name: reviews-config
   namespace: bookinfo
 data:
-  config.yaml: |
+  prod.yaml: |
     server:
       port: 9082
+      host: "0.0.0.0"
       name: reviews-service
     database:
-      host: postgres
+      host: postgres-prod.database.svc.cluster.local
       port: 5432
       user: postgres
       password: postgres
@@ -60,13 +61,23 @@ spec:
       serviceAccountName: bookinfo-reviews
       containers:
         - name: reviews
-          image: bookinfo/reviews:v1
+          image: bookinfo/reviews:latest
           imagePullPolicy: IfNotPresent
-          env:
-            - name: SERVICE_VERSION
-              value: v1
           ports:
             - containerPort: 9082
+          env:
+            - name: APP_ENV
+              value: "prod"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
           volumeMounts:
             - name: config-volume
               mountPath: /app/config
@@ -81,13 +92,19 @@ spec:
             httpGet:
               path: /api/v1/health
               port: 9082
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: 9082
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 9082
+            failureThreshold: 30
             periodSeconds: 10
       volumes:
         - name: config-volume

@@ -1,5 +1,6 @@
 server:
-  port: 9080
+  port: 9083
+  host: "0.0.0.0"
   name: ratings-service
 
 database:
@@ -7,7 +8,7 @@ database:
   port: 5432
   user: postgres
   password: postgres
-  dbname: bookinfo
+  dbname: bookinfo_test
   sslmode: disable
 
 tracing:

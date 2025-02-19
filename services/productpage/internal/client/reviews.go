@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/zenor0/bookinfo/pkg/tracing"
 	pb "github.com/zenor0/bookinfo/proto/reviews"
 	"github.com/zenor0/bookinfo/services/productpage/internal/model"
 	"google.golang.org/grpc"
@@ -32,8 +33,10 @@ func (c *ReviewsClient) Close() error {
 	return c.conn.Close()
 }
 
-func (c *ReviewsClient) GetBookReviews(bookID uint, user string) ([]model.Review, error) {
-	ctx := context.Background()
+func (c *ReviewsClient) GetBookReviews(ctx context.Context, bookID uint, user string) ([]model.Review, error) {
+	ctx, span := tracing.StartSpan(ctx, "reviews.GetBookReviews")
+	defer span.End()
+
 	if user != "" {
 		ctx = metadata.AppendToOutgoingContext(ctx, "end-user", user)
 	}

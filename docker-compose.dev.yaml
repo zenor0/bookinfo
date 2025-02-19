@@ -1,0 +1,44 @@
+services:
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: bookinfo-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bookinfo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bookinfo-dev-network
+
+  # 添加 pgAdmin 用于开发时方便查看数据库
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bookinfo-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bookinfo.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-dev
+    networks:
+      - bookinfo-dev-network
+
+volumes:
+  postgres_dev_data:
+    name: bookinfo-postgres-dev-data
+
+networks:
+  bookinfo-dev-network:
+    name: bookinfo-dev-network
+    driver: bridge 

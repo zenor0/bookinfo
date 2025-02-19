@@ -1,23 +1,25 @@
-# 构建阶段
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
 # 安装构建依赖
 RUN apk add --no-cache git
 
-# 复制 go.mod 和 go.sum
-COPY go.mod ./
-COPY go.sum ./
+# 先只复制依赖文件
+COPY go.mod go.sum ./
 
-# 下载依赖
-RUN go mod download
+# 使用 BuildKit 缓存挂载
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
 # 复制源代码
 COPY . .
 
-# 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -o productpage-service ./services/productpage/cmd/main.go
+# 构建应用，同样使用缓存
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux go build -o productpage-service ./services/productpage/cmd/main.go
 
 # 运行阶段
 FROM alpine:3.19
@@ -28,7 +30,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
 # 复制配置文件和静态资源
-COPY services/productpage/config/config.yaml /app/config/config.yaml
+COPY services/productpage/config /app/config
 COPY services/productpage/static /app/static
 COPY services/productpage/templates /app/templates
 

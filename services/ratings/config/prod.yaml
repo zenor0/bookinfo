@@ -1,0 +1,17 @@
+server:
+  port: 9083
+  host: "0.0.0.0"
+  name: ratings-service
+
+database:
+  host: postgres-prod.database.svc.cluster.local
+  port: 5432
+  user: postgres
+  password: postgres
+  dbname: bookinfo
+  sslmode: disable
+
+tracing:
+  enabled: true
+  jaeger_url: http://jaeger:14268/api/traces
+  service_name: ratings-service 

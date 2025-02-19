@@ -4,10 +4,25 @@ metadata:
   name: productpage-config
   namespace: bookinfo
 data:
-  config.yaml: |
+  prod.yaml: |
     server:
-      port: 9083
+      port: 9080
+      host: "0.0.0.0"
       name: productpage-service
+    database:
+      host: postgres-prod.database.svc.cluster.local
+      port: 5432
+      user: postgres
+      password: postgres
+      dbname: bookinfo
+      sslmode: disable
+    services:
+      details:
+        url: http://details:9081
+      reviews:
+        url: http://reviews:9082
+      ratings:
+        url: http://ratings:9083
     tracing:
       enabled: true
       jaeger_url: http://jaeger:14268/api/traces
@@ -24,7 +39,7 @@ metadata:
     service: productpage
 spec:
   ports:
-    - port: 9083
+    - port: 9080
       name: http
   selector:
     app: productpage
@@ -56,13 +71,23 @@ spec:
           image: bookinfo/productpage:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 9083
+            - containerPort: 9080
+          env:
+            - name: APP_ENV
+              value: "prod"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
           volumeMounts:
             - name: config-volume
               mountPath: /app/config
-          env:
-            - name: SERVICE_VERSION
-              value: v1
           resources:
             requests:
               cpu: 100m
@@ -73,14 +98,20 @@ spec:
           livenessProbe:
             httpGet:
               path: /api/v1/health
-              port: 9083
-            initialDelaySeconds: 5
+              port: 9080
+            initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /api/v1/health
-              port: 9083
-            initialDelaySeconds: 5
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 9080
+            failureThreshold: 30
             periodSeconds: 10
       volumes:
         - name: config-volume
