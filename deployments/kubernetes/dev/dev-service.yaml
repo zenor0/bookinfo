@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres-dev
-spec:
-  type: ExternalName
-  externalName: host.minikube.internal   # 访问宿主机服务
-  # 或者使用实际的数据库地址
-  # externalName: your-db-server.example.com

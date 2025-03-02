@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-dev
+  namespace: bookinfo-dev
+spec:
+  type: ExternalName
+  externalName: host.docker.internal   # 这个地址在 docker 环境中指向宿主机
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  # 或者使用实际的数据库地址
+  # externalName: your-db-server.example.com

@@ -1,0 +1,7 @@
+api/
+build/
+docs/
+scripts/
+deployments/
+vendor/
+vendor/github.com/googleapis/
